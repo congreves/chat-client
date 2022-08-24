@@ -11,21 +11,18 @@ const localStorageEffect =
       localStorage.setItem(key, JSON.stringify(newValue));
     });
   };
-  
+
 export const userState = atom({
   key: "user",
   default: "",
-  effects_UNSTABLE: [localStorageEffect("user")],
 });
 
 export const idState = atom({
-    key: "id",
-    default: "",
+  key: "id",
+  default: "",
+});
 
-  });
-  
 export const roomState = atom({
   key: "room",
   default: "",
-  effects_UNSTABLE: [localStorageEffect("room")],
 });

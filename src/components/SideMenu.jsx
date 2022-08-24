@@ -1,8 +1,6 @@
 import { useState, useEffect, React } from "react";
 import { useRecoilState } from "recoil";
-import { io } from "socket.io-client";
 
-const socket = io("http://localhost:4000");
 import {
   Box,
   Flex,
@@ -31,6 +29,7 @@ import {
 import { AddIcon, DeleteIcon } from "@chakra-ui/icons";
 import { userState, idState, roomState } from "../recoil/atom";
 
+import { socketID, socket } from "../socket";
 
 function SideMenu() {
   const [user, setUser] = useRecoilState(userState);
@@ -40,50 +39,45 @@ function SideMenu() {
   const [rooms, setRooms] = useState([]);
 
   useEffect(() => {
-    // here we can use socket events and listeners
+    socket.on("connection", (data) => {
+      console.log("server is connected");
+      setRooms(data.rooms);
+      setUsers(data.users);
+    });
 
     socket.on("created", (data) => {
       setUserId(data.id);
-      console.log(data);
     });
     socket.on("allUsers", (data) => {
       setUsers(data);
       console.log(data);
     });
-    socket.on("createRoom", (data) => {
-      console.log(data);
-    });
+    socket.on("createRoom", (data) => {});
     socket.on("allRooms", (data) => {
       setRooms(data);
-      console.log(data);
     });
     socket.on("deleteRoom", (data) => {
       setRooms(data);
-      console.log(data);
     });
   }, []);
 
   const handleUser = (username) => {
     socket.emit("create", username);
     setUser(username);
-    console.log(user);
   };
 
   const handleRooms = (room_name) => {
     socket.emit("createRoom", room_name);
     setRoom(room_name);
-    console.log(room);
   };
 
   const handleDelete = (room_name) => {
     socket.emit("deleteRoom", room_name);
-    console.log(room);
   };
 
   const handleJoin = (room_name) => {
     socket.emit("joinRoom", room_name);
     setRoom(room_name);
-    console.log(room);
   };
 
   useEffect(() => {
@@ -109,7 +103,7 @@ function SideMenu() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [overlay, setOverlay] = useState(<OverlayOne />);
   const [overlayTwo, setOverlayTwo] = useState(<OverlayTwo />);
-console.log(userId);
+  console.log(userId);
   return (
     <Flex w="30%" h="70vh" direction="column" p="4">
       <Modal isCentered isOpen={isOpen} onClose={onClose}>
@@ -144,9 +138,6 @@ console.log(userId);
         </ModalContent>
       </Modal>
 
-      <Text fontWeight="bold" color="#180B28" fontSize="1rem" textAlign="left">
-        All rooms
-      </Text>
       <Box
         bg="rgba( 255, 255, 255, 0.25 )"
         box-shadow="0 8px 32px 0 rgba( 31, 38, 135, 0.37 )"
@@ -156,9 +147,23 @@ console.log(userId);
         h="70vh"
         p="4"
       >
+        <Text
+          fontWeight="bold"
+          color="#180B28"
+          fontSize="1rem"
+          textAlign="left"
+          mb="2.5"
+        >
+          All users
+        </Text>
         {users.map((user) => {
           return (
-            <Tag size="lg" colorScheme="gray" borderRadius="full" key={user.id}>
+            <Tag
+              size="lg"
+              colorScheme={user.username == user ? "green" : "gray"}
+              borderRadius="full"
+              key={user.id}
+            >
               <Avatar
                 src="https://bit.ly/sage-adebayo"
                 size="xs"
@@ -173,26 +178,29 @@ console.log(userId);
             </Tag>
           );
         })}
-
+        <Text
+          fontWeight="bold"
+          color="#180B28"
+          fontSize="1rem"
+          textAlign="left"
+          mb="2.5"
+        >
+          All rooms
+        </Text>
         <ButtonGroup
           colorScheme="purple"
           size="sm"
           isAttached
           variant="outline"
           display="flex"
+          onClick={() => {
+            setOverlayTwo(<OverlayTwo />);
+            onOpen();
+          }}
         >
-          <Button
-            ml="4"
-            onClick={() => {
-              setOverlayTwo(<OverlayTwo />);
-              onOpen();
-            }}
-          >
-            Create a new room
-          </Button>
+          <Button mb="5">Create a new room</Button>
           <IconButton aria-label="Add new chat rooms" icon={<AddIcon />} />
         </ButtonGroup>
-
         {rooms.map((room) => {
           return (
             <ButtonGroup
@@ -208,25 +216,30 @@ console.log(userId);
                   name="Ryan Florence"
                   src="https://bit.ly/ryan-florence"
                 />
-                <Avatar
-                  name="Segun Adebayo"
-                  src="https://bit.ly/sage-adebayo"
-                />
-                <Avatar name="Kent Dodds" src="https://bit.ly/kent-c-dodds" />
-                <Avatar
-                  name="Prosper Otemuyiwa"
-                  src="https://bit.ly/prosper-baba"
-                />
+
                 <Avatar
                   name="Christian Nwamba"
                   src="https://bit.ly/code-beast"
                 />
               </AvatarGroup>
-              <Button ml="4">{room.room_name}</Button>
-              <IconButton aria-label="Add to chat rooms" icon={<AddIcon />} onClick={() => {
-                handleJoin(room.room_name);
-            
-              }} />
+              <Button
+                mb="2.5"
+                minW="100px"
+                colorScheme={room === room.room_name ? "green" : "blue"}
+                ml="4"
+                onClick={() => {
+                  handleJoin(room.room_name);
+                }}
+              >
+                {room.room_name}
+              </Button>
+              <IconButton
+                aria-label="Add to chat rooms"
+                icon={<AddIcon />}
+                onClick={() => {
+                  handleJoin(room.room_name);
+                }}
+              />
               <IconButton
                 aria-label="Delete chat rooms"
                 icon={<DeleteIcon />}
