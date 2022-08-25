@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
-import { useRecoilState } from "recoil";
+
+import React, { useState, useEffect} from "react";
+import { useRecoilValue } from "recoil";
 import { userState, idState, roomState } from "./recoil/atom";
 
 import {
@@ -15,25 +16,24 @@ import { TimeIcon, CheckIcon } from "@chakra-ui/icons";
 
 import "./App.css";
 
-import { socketID, socket } from "./socket";
+import { socket } from "./socket";
 import SideMenu from "./components/SideMenu";
 
 function App() {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
-  const [username, setUsername] = useRecoilState(userState);
-  const [userId, setUserId] = useRecoilState(idState);
-  const [users, setUsers] = useState([]);
-  const [room, setRoom] = useRecoilState(roomState);
-  const [rooms, setRooms] = useState([]);
+  const username = useRecoilValue(userState);
+  const userId = useRecoilValue(idState);
 
-  const [avatar, setAvatar] = useState("");
+  const room = useRecoilValue(roomState);
+
+
+ // const [avatar, setAvatar] = useState("");
 
   useEffect(() => {
-    socket.on("connection", (data) => {
+    socket.on("connection", () => {
       console.log("server is connected");
-      setRooms(data.rooms);
-      setUsers(data.users);
+    
     });
 
     socket.on("sentMessage", (data) => {

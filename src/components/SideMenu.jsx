@@ -27,16 +27,22 @@ import {
   AvatarGroup,
 } from "@chakra-ui/react";
 import { AddIcon, DeleteIcon } from "@chakra-ui/icons";
-import { userState, idState, roomState } from "../recoil/atom";
+import {
+  userState,
+  idState,
+  roomState,
+  usersState,
+  roomsState,
+} from "../recoil/atom";
 
-import { socketID, socket } from "../socket";
+import { socket } from "../socket";
 
 function SideMenu() {
   const [user, setUser] = useRecoilState(userState);
   const [userId, setUserId] = useRecoilState(idState);
-  const [users, setUsers] = useState([]);
+  const [users, setUsers] = useRecoilState(usersState);
   const [room, setRoom] = useRecoilState(roomState);
-  const [rooms, setRooms] = useState([]);
+  const [rooms, setRooms] = useRecoilState(roomsState);
 
   useEffect(() => {
     socket.on("connection", (data) => {

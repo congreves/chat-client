@@ -17,6 +17,11 @@ export const userState = atom({
   default: "",
 });
 
+export const usersState = atom({
+  key: "users",
+  default: [],
+});
+
 export const idState = atom({
   key: "id",
   default: "",
@@ -25,4 +30,9 @@ export const idState = atom({
 export const roomState = atom({
   key: "room",
   default: "",
+});
+
+export const roomsState = atom({
+  key: "rooms",
+  default: [],
 });
